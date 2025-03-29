@@ -58,90 +58,48 @@ col2.title("NETWORKER DASHBOARD")
 def get_mock_data():
     data = {
         "Customer 1": {
-            "DC 1": {"Server A": {"NW Server": 5, "STG Node": 3, "DD's Count": 10, "SO Count": 8},
-                     "Server B": {"NW Server": 4, "STG Node": 2, "DD's Count": 12, "SO Count": 6}},
-            "DC 2": {"Server A": {"NW Server": 3, "STG Node": 1, "DD's Count": 8, "SO Count": 5},
-                     "Server B": {"NW Server": 2, "STG Node": 1, "DD's Count": 6, "SO Count": 4}},
+            "DC 1": {"Server A": {"Successful": 60, "Failed": 25, "Running": 15},
+                     "Server B": {"Successful": 50, "Failed": 30, "Running": 20}},
+            "DC 2": {"Server A": {"Successful": 40, "Failed": 20, "Running": 10},
+                     "Server B": {"Successful": 35, "Failed": 25, "Running": 15}},
         },
-        "Customer 2": {
-            "DC 3": {"Server A": {"NW Server": 6, "STG Node": 4, "DD's Count": 14, "SO Count": 7},
-                     "Server C": {"NW Server": 5, "STG Node": 3, "DD's Count": 11, "SO Count": 6}},
-        },
-        "Customer 3": {
-            "DC 2": {"Server B": {"NW Server": 3, "STG Node": 2, "DD's Count": 8, "SO Count": 5},
-                     "Server C": {"NW Server": 4, "STG Node": 3, "DD's Count": 10, "SO Count": 6}},
-            "DC 3": {"Server A": {"NW Server": 4, "STG Node": 3, "DD's Count": 9, "SO Count": 5},
-                     "Server C": {"NW Server": 2, "STG Node": 1, "DD's Count": 7, "SO Count": 4}},
-        }
     }
     return data
 
 mock_data = get_mock_data()
 
-# Combined data when "All" customers and "All" data centers are selected
-def get_combined_data():
-    combined = {"NW Server": 0, "STG Node": 0, "DD's Count": 0, "SO Count": 0}
-    for customer, dcs in mock_data.items():
-        for dc, servers in dcs.items():
-            for server, stats in servers.items():
-                combined["NW Server"] += stats["NW Server"]
-                combined["STG Node"] += stats["STG Node"]
-                combined["DD's Count"] += stats["DD's Count"]
-                combined["SO Count"] += stats["SO Count"]
-    return combined
-
-# Dashboard Summary based on the selected filters
-if customer == "All" and data_center == "All" and backup_server == "All":
-    summary = get_combined_data()
-elif customer != "All" and data_center == "All" and backup_server == "All":
-    summary = {
-        "NW Server": sum([mock_data[customer][dc][server]["NW Server"] for dc in mock_data[customer] for server in mock_data[customer][dc]]),
-        "STG Node": sum([mock_data[customer][dc][server]["STG Node"] for dc in mock_data[customer] for server in mock_data[customer][dc]]),
-        "DD's Count": sum([mock_data[customer][dc][server]["DD's Count"] for dc in mock_data[customer] for server in mock_data[customer][dc]]),
-        "SO Count": sum([mock_data[customer][dc][server]["SO Count"] for dc in mock_data[customer] for server in mock_data[customer][dc]]),
-    }
-elif customer != "All" and data_center != "All" and backup_server == "All":
-    summary = {
-        "NW Server": sum([mock_data[customer][data_center][server]["NW Server"] for server in mock_data[customer][data_center]]),
-        "STG Node": sum([mock_data[customer][data_center][server]["STG Node"] for server in mock_data[customer][data_center]]),
-        "DD's Count": sum([mock_data[customer][data_center][server]["DD's Count"] for server in mock_data[customer][data_center]]),
-        "SO Count": sum([mock_data[customer][data_center][server]["SO Count"] for server in mock_data[customer][data_center]]),
-    }
-elif customer != "All" and data_center != "All" and backup_server != "All":
-    summary = mock_data[customer].get(data_center, {}).get(backup_server, {"NW Server": 0, "STG Node": 0, "DD's Count": 0, "SO Count": 0})
-
-# Display Summary
-col1, col2, col3, col4 = st.columns(4)
-col1.metric("NW Server", summary["NW Server"])
-col2.metric("STG Node", summary["STG Node"])
-col3.metric("DD's Count", summary["DD's Count"])
-col4.metric("SO Count", summary["SO Count"])
-
-# Pie Charts for Backup Job Details using Plotly
+# Line Charts for Backup Job Details using Plotly
 col1, col2 = st.columns(2)
 
-def plot_backup_pie_chart():
-    labels = ['Successful', 'Failed', 'Running']
-    sizes = [60, 25, 15]  # Mock data for jobs
-    colors = ['green', 'red', 'blue']
+def plot_backup_line_chart():
+    time_data = pd.date_range(start="2025-03-01", periods=10, freq='D')
+    successful = np.random.randint(50, 80, size=10)
+    failed = np.random.randint(10, 30, size=10)
+    running = np.random.randint(5, 20, size=10)
 
-    fig = go.Figure(data=[go.Pie(labels=labels, values=sizes, hoverinfo='label+percent', marker=dict(colors=colors))])
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=time_data, y=successful, mode='lines+markers', name='Successful', line=dict(color='green')))
+    fig.add_trace(go.Scatter(x=time_data, y=failed, mode='lines+markers', name='Failed', line=dict(color='red')))
+    fig.add_trace(go.Scatter(x=time_data, y=running, mode='lines+markers', name='Running', line=dict(color='blue')))
+    
     fig.update_layout(
         title="Backup Job Status",
+        xaxis_title='Time',
+        yaxis_title='Count',
         template='plotly_dark',
         plot_bgcolor='#0f1117',
         paper_bgcolor='#0f1117',
-        font=dict(color='white'),
+        font=dict(color='white')
     )
     return fig
 
 with col1:
     st.markdown("### Backup Job Details")
-    st.plotly_chart(plot_backup_pie_chart(), use_container_width=True, key="backup_job_pie_chart")
+    st.plotly_chart(plot_backup_line_chart(), use_container_width=True, key="backup_job_line_chart")
 
 with col2:
     st.markdown("### NW Server Health")
-    st.plotly_chart(plot_backup_pie_chart(), use_container_width=True, key="nw_server_health_pie_chart")
+    st.plotly_chart(plot_backup_line_chart(), use_container_width=True, key="nw_server_health_line_chart")
 
 # Prediction & Utilization Charts with Plotly (modified)
 st.subheader("Predictions & Utilization")
