@@ -124,18 +124,32 @@ if page == "Dashboard":
     col3.metric(label="SO Count", value=so_count)
     col4.metric(label="DD Count", value=dd_count)
 
-    # Add Line Graphs for Dashboard (Only Backup Success Rate)
+    # Time selection slider
     time_data = pd.date_range(start="2025-03-01", periods=10, freq='D')
     success_rate = np.random.uniform(95, 100, size=10)
-
+    
+    start_date, end_date = st.slider(
+        "Select Date Range:", 
+        min_value=time_data.min().to_pydatetime(), 
+        max_value=time_data.max().to_pydatetime(), 
+        value=(time_data.min().to_pydatetime(), time_data.max().to_pydatetime()), 
+        format="YYYY-MM-DD"
+    )
+    
+    # Filter data based on selected range
+    mask = (time_data >= start_date) & (time_data <= end_date)
+    filtered_time_data = time_data[mask]
+    filtered_success_rate = success_rate[mask]
+    
     def plot_line_chart(title, x_data, y_data, color):
         fig = go.Figure()
         fig.add_trace(go.Scatter(x=x_data, y=y_data, mode='lines+markers', line=dict(color=color), name=title))
         fig.update_layout(title=title, xaxis_title='Time', yaxis_title='%', plot_bgcolor='#0f1117', paper_bgcolor='#0f1117', font=dict(color='white'))
         return fig
     
-    # Only one graph now (Backup Success Rate)
-    st.plotly_chart(plot_line_chart("Backup Success Rate", time_data, success_rate, 'green'))
+    # Display graph based on selected range
+    st.plotly_chart(plot_line_chart("Backup Success Rate", filtered_time_data, filtered_success_rate, 'green'))
+
 
 # Predictions Page
 elif page == "Predictions":
