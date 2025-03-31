@@ -53,24 +53,19 @@ backup_server_options = (
 )
 backup_server = st.sidebar.selectbox("Select Backup Server", ["All"] + backup_server_options)
 
-# Navigation
-st.sidebar.subheader("📌 Navigation")
-page = st.sidebar.radio("Select a Page", ["Dashboard", "Predictions"])
+# Sidebar Navigation
+selected_page = st.sidebar.radio("Select Page", ["Dashboard", "Predictions"])
 
 # Dashboard Page
-if page == "Dashboard":
+if selected_page == "Dashboard":
     st.title("📊 NETWORKER DASHBOARD")
     st.subheader(f"Overview for {customer} - {data_center} - {backup_server}")
 
     # Initialize counts
-    server_count = 0
-    storage_node_count = 0
-    so_count = 0
-    dd_count = 0
+    server_count, storage_node_count, so_count, dd_count = 0, 0, 0, 0
 
     # Retrieve counts based on drilldown selection
     if customer == "All":
-        # Aggregate all customer data
         for cust_data in data.values():
             for dc_data in cust_data.values():
                 for server_data in dc_data.values():
@@ -80,49 +75,40 @@ if page == "Dashboard":
                     dd_count += server_data.get("DD's Count", 0)
     else:
         selected_data = data.get(customer, {})
+        for dc, dc_data in selected_data.items():
+            if data_center in ["All", dc]:
+                for server, server_data in dc_data.items():
+                    if backup_server in ["All", server]:
+                        server_count += 1
+                        storage_node_count += server_data.get("STG Node", 0)
+                        so_count += server_data.get("SO Count", 0)
+                        dd_count += server_data.get("DD's Count", 0)
 
-        if data_center == "All":
-            # Aggregate data for the selected customer
-            for dc_data in selected_data.values():
-                for server_data in dc_data.values():
-                    server_count += 1
-                    storage_node_count += server_data.get("STG Node", 0)
-                    so_count += server_data.get("SO Count", 0)
-                    dd_count += server_data.get("DD's Count", 0)
-        else:
-            selected_dc_data = selected_data.get(data_center, {})
-
-            if backup_server == "All":
-                # Aggregate data for the selected customer & data center
-                for server_data in selected_dc_data.values():
-                    server_count += 1
-                    storage_node_count += server_data.get("STG Node", 0)
-                    so_count += server_data.get("SO Count", 0)
-                    dd_count += server_data.get("DD's Count", 0)
-            else:
-                # Direct selection
-                selected_server_data = selected_dc_data.get(backup_server, {})
-                server_count = 1 if selected_server_data else 0
-                storage_node_count = selected_server_data.get("STG Node", 0)
-                so_count = selected_server_data.get("SO Count", 0)
-                dd_count = selected_server_data.get("DD's Count", 0)
-
-    # Mock data if counts are zero
-    if server_count == 0:
-        server_count = np.random.randint(1, 5)
-    if storage_node_count == 0:
-        storage_node_count = np.random.randint(1, 5)
-    if so_count == 0:
-        so_count = np.random.randint(1, 10)
-    if dd_count == 0:
-        dd_count = np.random.randint(5, 15)
-
-    # Display metrics
+    # Styled metric cards
+    def styled_metric_card(title, value, description, color1, color2):
+        st.markdown(
+            f"""
+            <div style="border-radius: 10px; padding: 20px; text-align: center; 
+                        background: linear-gradient(to left, rgba{color1}, rgba{color2}); 
+                        opacity: 1;">  <!-- Ensure text remains fully opaque -->
+                <h4 style="margin: 0; color: white;">{title}</h4>
+                <h2 style="margin: 5px 0; color: white;">{value}</h2>
+                <p style="margin: 0; color: #ddd;">{description}</p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    
     col1, col2, col3, col4 = st.columns(4)
-    col1.metric(label="Server Count", value=server_count)
-    col2.metric(label="Storage Node Count", value=storage_node_count)
-    col3.metric(label="SO Count", value=so_count)
-    col4.metric(label="DD Count", value=dd_count)
+    with col1: styled_metric_card("Server Count", server_count, "Total servers available", "(31, 41, 55, 0.3)", "(75, 85, 99, 0.3)")
+    with col2: styled_metric_card("Storage Node Count", storage_node_count, "Total storage nodes", "(20, 83, 45, 0.3)", "(34, 139, 34, 0.3)")
+    with col3: styled_metric_card("SO Count", so_count, "Total service objects", "(59, 7, 100, 0.3)", "(106, 13, 173, 0.3)")
+    with col4: styled_metric_card("DD Count", dd_count, "Total data domains", "(127, 29, 29, 0.3)", "(255, 69, 0, 0.3)")
+
+
+    # Add spacing
+    st.markdown("<div style='margin-bottom: 40px;'></div>", unsafe_allow_html=True)
+
 
     # Time selection slider
     time_data = pd.date_range(start="2025-03-01", periods=10, freq='D')
@@ -150,12 +136,36 @@ if page == "Dashboard":
     # Display graph based on selected range
     st.plotly_chart(plot_line_chart("Backup Success Rate", filtered_time_data, filtered_success_rate, 'green'))
 
-
 # Predictions Page
-elif page == "Predictions":
+elif selected_page == "Predictions":
     st.title("📈 Predictions & Utilization")
     time_data = pd.date_range(start="2025-03-01", periods=10, freq='D')
 
+    # Generate Time Data and Random Predictions
+    time_data = pd.date_range(start="2025-03-01", periods=10, freq='D')
+    backup_size = np.random.randint(50, 200, size=10)
+    disk_space = np.random.randint(500, 1000, size=10)
+    backup_throughput = np.random.randint(100, 300, size=10)
+    recovery_time = np.random.randint(10, 50, size=10)
+
+    # Date Selection Slider
+    start_date, end_date = st.slider(
+        "Select Date Range:", 
+        min_value=time_data.min().to_pydatetime(), 
+        max_value=time_data.max().to_pydatetime(), 
+        value=(time_data.min().to_pydatetime(), time_data.max().to_pydatetime()), 
+        format="YYYY-MM-DD"
+    )
+
+    # Filter Data Based on Selected Date Range
+    mask = (time_data >= start_date) & (time_data <= end_date)
+    filtered_time_data = time_data[mask]
+    filtered_backup_size = backup_size[mask]
+    filtered_disk_space = disk_space[mask]
+    filtered_backup_throughput = backup_throughput[mask]
+    filtered_recovery_time = recovery_time[mask]
+
+    # Function to Plot Graphs
     def plot_prediction_chart(title, x_data, y_data, color, linestyle):
         fig = go.Figure()
         fig.add_trace(go.Scatter(
@@ -176,19 +186,8 @@ elif page == "Predictions":
         )
         return fig
 
-    col1, col2 = st.columns(2, gap="large")
-    backup_size = np.random.randint(50, 200, size=10)
-    with col1:
-        st.plotly_chart(plot_prediction_chart("BSR Prediction", time_data, backup_size, 'blue', 'solid'))
-
-    disk_space = np.random.randint(500, 1000, size=10)
-    with col1:
-        st.plotly_chart(plot_prediction_chart("FETB Prediction", time_data, disk_space, 'red', 'dash'))
-
-    backup_throughput = np.random.randint(100, 300, size=10)
-    with col2:
-        st.plotly_chart(plot_prediction_chart("SO Utilization Prediction", time_data, backup_throughput, 'green', 'dot'))
-
-    recovery_time = np.random.randint(10, 50, size=10)
-    with col2:
-        st.plotly_chart(plot_prediction_chart("DD Utilization Prediction", time_data, recovery_time, 'orange', 'dashdot'))
+    # Display One Graph Per Line with Filtered Data
+    #st.plotly_chart(plot_prediction_chart("BSR Prediction", filtered_time_data, filtered_backup_size, 'blue', 'solid'))
+    st.plotly_chart(plot_prediction_chart("FETB Prediction", filtered_time_data, filtered_disk_space, 'red', 'dash'))
+    st.plotly_chart(plot_prediction_chart("SO Utilization Prediction", filtered_time_data, filtered_backup_throughput, 'green', 'dot'))
+    st.plotly_chart(plot_prediction_chart("DD Utilization Prediction", filtered_time_data, filtered_recovery_time, 'orange', 'dashdot'))
