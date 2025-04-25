@@ -1,0 +1,92 @@
+{
+    "data_centers": {
+      "All": ["DC 1", "DC 2", "DC 3"],
+      "Customer 1": ["DC 1", "DC 2"],
+      "Customer 2": ["DC 3"],
+      "Customer 3": ["DC 2", "DC 3"]
+    },
+    "backup_servers": {
+      "DC 1": ["Server A", "Server B"],
+      "DC 2": ["Server B", "Server C"],
+      "DC 3": ["Server A", "Server C"]
+    },
+    "data": {
+      "Customer 1": {
+        "DC 1": {
+          "Server A": {
+            "NW Server": 5,
+            "STG Node": 3,
+            "DD's Count": 10,
+            "SO Count": 8
+          },
+          "Server B": {
+            "NW Server": 4,
+            "STG Node": 2,
+            "DD's Count": 12,
+            "SO Count": 6
+          }
+        },
+        "DC 2": {
+          "Server A": {
+            "NW Server": 3,
+            "STG Node": 1,
+            "DD's Count": 8,
+            "SO Count": 5
+          },
+          "Server B": {
+            "NW Server": 2,
+            "STG Node": 1,
+            "DD's Count": 6,
+            "SO Count": 4
+          }
+        }
+      },
+      "Customer 2": {
+        "DC 3": {
+          "Server A": {
+            "NW Server": 6,
+            "STG Node": 4,
+            "DD's Count": 14,
+            "SO Count": 7
+          },
+          "Server C": {
+            "NW Server": 5,
+            "STG Node": 3,
+            "DD's Count": 11,
+            "SO Count": 6
+          }
+        }
+      },
+      "Customer 3": {
+        "DC 2": {
+          "Server B": {
+            "NW Server": 3,
+            "STG Node": 2,
+            "DD's Count": 8,
+            "SO Count": 5
+          },
+          "Server C": {
+            "NW Server": 4,
+            "STG Node": 3,
+            "DD's Count": 10,
+            "SO Count": 6
+          }
+        },
+        "DC 3": {
+          "Server A": {
+            "NW Server": 4,
+            "STG Node": 3,
+            "DD's Count": 9,
+            "SO Count": 5
+          },
+          "Server C": {
+            "NW Server": 2,
+            "STG Node": 1,
+            "DD's Count": 7,
+            "SO Count": 4
+          }
+        }
+      }
+    }
+  }
+  

@@ -2,42 +2,51 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
+import json
 
 # Set page configuration
 st.set_page_config(page_title="Networker Dashboard", layout="wide")
 
 # Mock Data
-data_centers = {
-    "All": ["DC 1", "DC 2", "DC 3"],
-    "Customer 1": ["DC 1", "DC 2"],
-    "Customer 2": ["DC 3"],
-    "Customer 3": ["DC 2", "DC 3"]
-}
+# data_centers = {
+#     "All": ["DC 1", "DC 2", "DC 3"],
+#     "Customer 1": ["DC 1", "DC 2"],
+#     "Customer 2": ["DC 3"],
+#     "Customer 3": ["DC 2", "DC 3"]
+# }
 
-backup_servers = {
-    "DC 1": ["Server A", "Server B"],
-    "DC 2": ["Server B", "Server C"],
-    "DC 3": ["Server A", "Server C"],
-}
+# backup_servers = {
+#     "DC 1": ["Server A", "Server B"],
+#     "DC 2": ["Server B", "Server C"],
+#     "DC 3": ["Server A", "Server C"],
+# }
 
-data = {
-    "Customer 1": {
-        "DC 1": {"Server A": {"NW Server": 5, "STG Node": 3, "DD's Count": 10, "SO Count": 8},
-                 "Server B": {"NW Server": 4, "STG Node": 2, "DD's Count": 12, "SO Count": 6}},
-        "DC 2": {"Server A": {"NW Server": 3, "STG Node": 1, "DD's Count": 8, "SO Count": 5},
-                 "Server B": {"NW Server": 2, "STG Node": 1, "DD's Count": 6, "SO Count": 4}},
-    },
-    "Customer 2": {
-        "DC 3": {"Server A": {"NW Server": 6, "STG Node": 4, "DD's Count": 14, "SO Count": 7},
-                 "Server C": {"NW Server": 5, "STG Node": 3, "DD's Count": 11, "SO Count": 6}},
-    },
-    "Customer 3": {
-        "DC 2": {"Server B": {"NW Server": 3, "STG Node": 2, "DD's Count": 8, "SO Count": 5},
-                 "Server C": {"NW Server": 4, "STG Node": 3, "DD's Count": 10, "SO Count": 6}},
-        "DC 3": {"Server A": {"NW Server": 4, "STG Node": 3, "DD's Count": 9, "SO Count": 5},
-                 "Server C": {"NW Server": 2, "STG Node": 1, "DD's Count": 7, "SO Count": 4}},
-    }
-}
+# data = {
+#     "Customer 1": {
+#         "DC 1": {"Server A": {"NW Server": 5, "STG Node": 3, "DD's Count": 10, "SO Count": 8},
+#                  "Server B": {"NW Server": 4, "STG Node": 2, "DD's Count": 12, "SO Count": 6}},
+#         "DC 2": {"Server A": {"NW Server": 3, "STG Node": 1, "DD's Count": 8, "SO Count": 5},
+#                  "Server B": {"NW Server": 2, "STG Node": 1, "DD's Count": 6, "SO Count": 4}},
+#     },
+#     "Customer 2": {
+#         "DC 3": {"Server A": {"NW Server": 6, "STG Node": 4, "DD's Count": 14, "SO Count": 7},
+#                  "Server C": {"NW Server": 5, "STG Node": 3, "DD's Count": 11, "SO Count": 6}},
+#     },
+#     "Customer 3": {
+#         "DC 2": {"Server B": {"NW Server": 3, "STG Node": 2, "DD's Count": 8, "SO Count": 5},
+#                  "Server C": {"NW Server": 4, "STG Node": 3, "DD's Count": 10, "SO Count": 6}},
+#         "DC 3": {"Server A": {"NW Server": 4, "STG Node": 3, "DD's Count": 9, "SO Count": 5},
+#                  "Server C": {"NW Server": 2, "STG Node": 1, "DD's Count": 7, "SO Count": 4}},
+#     }
+# }
+
+# Load external data.json
+with open("data.json") as f:
+    json_data = json.load(f)
+
+data_centers = json_data["data_centers"]
+backup_servers = json_data["backup_servers"]
+data = json_data["data"]
 
 # Sidebar Filters
 st.sidebar.title("🔍 Drill-down Selection")
